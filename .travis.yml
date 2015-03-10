@@ -1,0 +1,3 @@
+language: scala
+script:
+    - mvn install
