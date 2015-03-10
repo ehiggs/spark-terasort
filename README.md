@@ -1,4 +1,5 @@
-TeraSort benchmark for Spark
+#TeraSort benchmark for Spark
+
 [![Build
 Status](https://travis-ci.org/ehiggs/spark-terasort.svg)](https://travis-ci.org/ehiggs/spark-terasort)
 
@@ -37,7 +38,7 @@ but it is not the same TeraSort program that currently holds the
 ## Performance
 
 This terasort doesn't use the partitioning scheme that Hadoop's Terasort uses.
-This results in not very good performance. I could copy the TeraPartioner file
+This results in not very good performance. I could copy the Partitioning code
 from the Hadoop tree verbatim but I thought it would be more appropriate to
 rewrite more of it in Scala.
 
