@@ -45,7 +45,7 @@ object TeraGen {
     val size = sizeToSizeStr(outputSizeInBytes)
 
     val conf = new SparkConf()
-      .setAppName(s"TeraSort ($size)")
+      .setAppName(s"TeraGen ($size)")
     val sc = new SparkContext(conf)
 
     val parts = sc.defaultMinPartitions
