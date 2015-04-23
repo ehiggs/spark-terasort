@@ -51,10 +51,6 @@ object TeraInputFormat {
    val KEY_LEN = 10
    val VALUE_LEN = 90
    val RECORD_LEN = KEY_LEN + VALUE_LEN
-   val NUM_INPUT_FILES = "mapreduce.input.fileinputformat.numinputfiles"
-   val NUM_PARTITIONS = "mapreduce.terasort.num.partitions"
-   val SAMPLE_SIZE = "mapreduce.terasort.partitions.sample"
-   val SPLIT_SLOP = 1.1
    var lastContext : JobContext = null
    var lastResult : List[InputSplit] = null
    implicit val caseInsensitiveOrdering = UnsignedBytes.lexicographicalComparator
