@@ -20,7 +20,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>spark-terasort</groupId>
 <artifactId>spark-terasort</artifactId>
-<version>1.0-SNAPSHOT</version>
+<version>1.0</version>
 
 <name>spark-terasort</name>
 <url>https://github.com/ehiggs/spark-terasort</url>
@@ -43,6 +43,17 @@
     <organization>Ghent University</organization>
   </developer>
 </developers>
+
+<distributionManagement>
+  <snapshotRepository>
+    <id>ossrh</id>
+    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+  </snapshotRepository>
+  <repository>
+    <id>ossrh</id>
+    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+  </repository>
+</distributionManagement>
 
 <repositories>
   <repository>
