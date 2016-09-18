@@ -218,9 +218,9 @@
 
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <scala.version>2.10.4</scala.version>
-  <scala.binary.version>2.10</scala.binary.version>
-  <spark.version>1.2.1</spark.version>
+  <scala.version>2.11.8</scala.version>
+  <scala.binary.version>2.11</scala.binary.version>
+  <spark.version>2.0.0</spark.version>
 </properties>
 
 <dependencies>
