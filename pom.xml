@@ -15,18 +15,20 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 <modelVersion>4.0.0</modelVersion>
 <groupId>com.github.ehiggs</groupId>
 <artifactId>spark-terasort</artifactId>
-<version>1.1</version>
+<version>1.1-SNAPSHOT</version>
 
 <name>spark-terasort</name>
 <url>https://github.com/ehiggs/spark-terasort</url>
 <description>Terasort benchmark for Spark.</description>
+<packaging>jar</packaging>
 <scm>
+  <connection>scm:git:git@github.com:ehiggs/${project.artifactId}.git</connection>
   <url>https://github.com/ehiggs/spark-terasort.git</url>
+  <tag>spark-terasort-1.1</tag>
 </scm>
 <licenses>
   <license>
@@ -54,31 +56,6 @@
   </repository>
 </distributionManagement>
 
-<repositories>
-  <repository>
-    <id>scala-tools.org</id>
-    <name>Scala-tools Maven2 Repository</name>
-    <url>http://scala-tools.org/repo-releases</url>
-  </repository>
-</repositories>
-<pluginRepositories>
-  <pluginRepository>
-    <id>scala-tools.org</id>
-    <name>Scala-tools Maven2 Repository</name>
-    <url>http://scala-tools.org/repo-releases</url>
-  </pluginRepository>
-  <pluginRepository>
-    <id>central</id>
-    <url>https://repo1.maven.org/maven2</url>
-    <releases>
-      <enabled>true</enabled>
-    </releases>
-    <snapshots>
-      <enabled>false</enabled>
-    </snapshots>
-  </pluginRepository>
-</pluginRepositories>
-
 <build>
   <resources>
     <resource>
@@ -95,13 +72,19 @@
       </configuration>
     </plugin>
     <plugin>
-      <groupId>org.scala-tools</groupId>
-      <artifactId>maven-scala-plugin</artifactId>
+      <groupId>net.alchim31.maven</groupId>
+      <artifactId>scala-maven-plugin</artifactId>
       <executions>
         <execution>
           <goals>
             <goal>compile</goal>
             <goal>testCompile</goal>
+          </goals>
+        </execution>
+        <execution>
+          <id>attach-javadocs</id>
+          <goals>
+            <goal>doc-jar</goal>
           </goals>
         </execution>
       </executions>
@@ -112,8 +95,8 @@
           <jvmArg>-Xmx1024m</jvmArg>
         </jvmArgs>
       </configuration>
-    </plugin>
-    <plugin>                                                                  
+  </plugin>
+  <plugin>                                                                  
       <groupId>org.apache.maven.plugins</groupId>                             
       <artifactId>maven-dependency-plugin</artifactId>                        
       <executions>                                                            
