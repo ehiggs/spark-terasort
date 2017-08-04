@@ -93,7 +93,7 @@ object TeraValidate {
         }
         prev.copyToArray(max, 0, 10)
         Iterator((sum, min, max))
-      }, true)
+      }, preservesPartitioning = true)
 
       val checksumOutput = output.collect()
       val cmp = UnsignedBytes.lexicographicalComparator()

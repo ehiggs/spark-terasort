@@ -29,7 +29,7 @@ case class TeraSortPartitioner(numPartitions: Int) extends Partitioner {
 
   import TeraSortPartitioner._
 
-  val rangePerPart = (max - min) / numPartitions
+  val rangePerPart : Long = (max - min) / numPartitions
 
   override def getPartition(key: Any): Int = {
     val b = key.asInstanceOf[Array[Byte]]
@@ -39,6 +39,6 @@ case class TeraSortPartitioner(numPartitions: Int) extends Partitioner {
 }
 
 object TeraSortPartitioner {
-  val min = Longs.fromBytes(0, 0, 0, 0, 0, 0, 0, 0)
-  val max = Longs.fromBytes(0, -1, -1, -1, -1, -1, -1, -1)  // 0xff = -1
+  val min : Long = Longs.fromBytes(0, 0, 0, 0, 0, 0, 0, 0)
+  val max : Long = Longs.fromBytes(0, -1, -1, -1, -1, -1, -1, -1)  // 0xff = -1
 }

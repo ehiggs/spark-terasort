@@ -17,7 +17,6 @@
 
 package com.github.ehiggs.spark.terasort
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.{SparkConf, SparkContext}
 
 object TeraGen {
