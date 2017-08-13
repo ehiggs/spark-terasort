@@ -1,4 +1,4 @@
-#TeraSort benchmark for Spark
+# TeraSort benchmark for Spark
 
 [![Build
 Status](https://travis-ci.org/ehiggs/spark-terasort.svg)](https://travis-ci.org/ehiggs/spark-terasort)
@@ -13,9 +13,11 @@ but it is not the same TeraSort program that currently holds the
 
 `mvn install`
 
+The default is to link against Spark 2.1 jars (released December 2016). If you plan to run using an older version of Spark (e.g. 1.6) you will have to try `-Dspark.version=1.6`. If possible, it's probably a better idea to just update to a more recent version or Spark.
+
 # Running
 
-`cd` to your your spark install.
+`cd` to your your Spark install.
 
 ## Generate data
 
