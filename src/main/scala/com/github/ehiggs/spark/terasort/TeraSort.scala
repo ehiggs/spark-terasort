@@ -63,6 +63,5 @@ object TeraSort {
     sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
     
     System.exit(0) //explicitly exiting
-	
   }
 }
