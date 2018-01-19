@@ -61,5 +61,8 @@ object TeraSort {
     val sorted = dataset.repartitionAndSortWithinPartitions(
       new TeraSortPartitioner(dataset.partitions.length))
     sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
+    
+    System.exit(0) //explicitly exiting
+	
   }
 }
