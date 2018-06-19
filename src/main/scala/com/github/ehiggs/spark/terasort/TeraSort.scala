@@ -62,6 +62,6 @@ object TeraSort {
       new TeraSortPartitioner(dataset.partitions.length))
     sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
     
-    System.exit(0) //explicitly exiting
+    sc.stop()
   }
 }
