@@ -74,6 +74,7 @@
     <plugin>
       <groupId>net.alchim31.maven</groupId>
       <artifactId>scala-maven-plugin</artifactId>
+      <version>4.3.0</version>
       <executions>
         <execution>
           <goals>
@@ -94,6 +95,7 @@
           <jvmArg>-Xms64m</jvmArg>
           <jvmArg>-Xmx1024m</jvmArg>
         </jvmArgs>
+        <scalaVersion>${scala.version}</scalaVersion>
       </configuration>
   </plugin>
   <plugin>                                                                  
