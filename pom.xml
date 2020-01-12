@@ -19,7 +19,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>com.github.ehiggs</groupId>
 <artifactId>spark-terasort</artifactId>
-<version>1.1-SNAPSHOT</version>
+<version>1.2-SNAPSHOT</version>
 
 <name>spark-terasort</name>
 <url>https://github.com/ehiggs/spark-terasort</url>
@@ -74,6 +74,7 @@
     <plugin>
       <groupId>net.alchim31.maven</groupId>
       <artifactId>scala-maven-plugin</artifactId>
+      <version>4.3.0</version>
       <executions>
         <execution>
           <goals>
@@ -94,6 +95,10 @@
           <jvmArg>-Xms64m</jvmArg>
           <jvmArg>-Xmx1024m</jvmArg>
         </jvmArgs>
+		<args>
+			<arg>-nobootcp</arg>
+		</args>
+        <scalaVersion>${scala.version}</scalaVersion>
       </configuration>
   </plugin>
   <plugin>                                                                  
@@ -200,9 +205,9 @@
 
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  <scala.version>2.12.8</scala.version>
-  <scala.binary.version>2.12</scala.binary.version>
-  <spark.version>2.4.2</spark.version>
+  <scala.version>2.11.12</scala.version>
+  <scala.binary.version>2.11</scala.binary.version>
+  <spark.version>2.4.4</spark.version>
 </properties>
 
 <dependencies>
