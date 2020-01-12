@@ -95,6 +95,9 @@
           <jvmArg>-Xms64m</jvmArg>
           <jvmArg>-Xmx1024m</jvmArg>
         </jvmArgs>
+		<args>
+			<arg>-nobootcp</arg>
+		</args>
         <scalaVersion>${scala.version}</scalaVersion>
       </configuration>
   </plugin>
