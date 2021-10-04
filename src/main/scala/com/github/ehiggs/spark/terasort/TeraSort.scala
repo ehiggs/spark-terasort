@@ -58,10 +58,12 @@ object TeraSort {
     val sc = new SparkContext(conf)
 
     val dataset = sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile)
+    val startTime = System.currentTimeMillis()
     val sorted = dataset.repartitionAndSortWithinPartitions(
       new TeraSortPartitioner(dataset.partitions.length))
     sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
-    
+    val endTime = System.currentTimeMillis()
+    println(s"==== TeraSort took ${(endTime-startTime)/1000.0}s ====")
     sc.stop()
   }
 }
