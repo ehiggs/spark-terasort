@@ -7,6 +7,8 @@ import logging
 import os
 import subprocess
 
+import numpy as np
+
 
 HDFS_DIR = "terasort"
 
@@ -15,12 +17,19 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 JAR_NAME = "spark-terasort-1.2-SNAPSHOT-jar-with-dependencies.jar"
 JAR_PATH = os.path.join(REPO_ROOT, "target", JAR_NAME)
 
-STEPS = ["generate_input", "sort", "validate_output"]
+SPARK_SUBMIT_WITH_ARGS = " ".join(
+    [
+        "spark-submit",
+        # "-c spark.executor.memory=4g",
+    ]
+)
 
 TERASORT_PKG = "com.github.ehiggs.spark.terasort."
 TERAGEN_CLASS = TERASORT_PKG + "TeraGen"
 TERASORT_CLASS = TERASORT_PKG + "TeraSort"
 TERAVALIDATE_CLASS = TERASORT_PKG + "TeraValidate"
+
+STEPS = ["generate_input", "sort", "validate_output"]
 
 
 def get_args(*args, **kwargs):
@@ -30,6 +39,12 @@ def get_args(*args, **kwargs):
         default=1,
         type=float,
         help="total data size in TiB",
+    )
+    parser.add_argument(
+        "--input_part_size",
+        default=2500 * 1000 * 1000,
+        type=int,
+        help="size in bytes of each map partition",
     )
     # Which steps to run?
     steps_grp = parser.add_argument_group(
@@ -47,6 +62,7 @@ def _get_app_args(args):
         for step in STEPS:
             args_dict[step] = True
     args.total_data_size = int(args.total_tb * 10 ** 12)
+    args.num_mappers = int(np.ceil(args.total_data_size / args.input_part_size))
 
 
 def run(cmd, **kwargs):
@@ -68,7 +84,8 @@ def start_yarn():
 
 def generate_input(args):
     parts = [
-        "spark-submit",
+        SPARK_SUBMIT_WITH_ARGS,
+        f"-c spark.default.parallelism={args.num_mappers}",
         f"--class {TERAGEN_CLASS}",
         f"--master yarn",
         JAR_PATH,
@@ -82,7 +99,7 @@ def generate_input(args):
 
 def sort_main(args):
     parts = [
-        "spark-submit",
+        SPARK_SUBMIT_WITH_ARGS,
         f"--class {TERASORT_CLASS}",
         f"--master yarn",
         JAR_PATH,
@@ -96,7 +113,7 @@ def sort_main(args):
 
 def validate_output(args):
     parts = [
-        "spark-submit",
+        SPARK_SUBMIT_WITH_ARGS,
         f"--class {TERAVALIDATE_CLASS}",
         f"--master yarn",
         JAR_PATH,
@@ -110,6 +127,7 @@ def validate_output(args):
 
 def main(args):
     _get_app_args(args)
+    print(args)
     # TODO: wandb setup and logging of time
 
     if args.generate_input:

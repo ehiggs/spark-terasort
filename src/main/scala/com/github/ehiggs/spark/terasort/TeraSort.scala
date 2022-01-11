@@ -57,11 +57,16 @@ object TeraSort {
       .setAppName(s"TeraSort")
     val sc = new SparkContext(conf)
 
+    val startTime = System.nanoTime
+
     val dataset = sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile)
     val sorted = dataset.repartitionAndSortWithinPartitions(
       new TeraSortPartitioner(dataset.partitions.length))
     sorted.saveAsNewAPIHadoopFile[TeraOutputFormat](outputFile)
-    
+
+    val executionTime = System.nanoTime() - startTime
+    println("TeraSort Execution Time", executionTime / 1e9d)
+
     sc.stop()
   }
 }
