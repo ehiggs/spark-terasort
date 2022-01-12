@@ -17,19 +17,18 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 JAR_NAME = "spark-terasort-1.2-SNAPSHOT-jar-with-dependencies.jar"
 JAR_PATH = os.path.join(REPO_ROOT, "target", JAR_NAME)
 
-SPARK_SUBMIT_WITH_ARGS = " ".join(
-    [
-        "spark-submit",
-        # "-c spark.executor.memory=4g",
-    ]
-)
+STEPS = [
+    "start_hadoop",
+    "generate_input",
+    "sort",
+    "validate_output",
+    "stop_hadoop",
+]
 
 TERASORT_PKG = "com.github.ehiggs.spark.terasort."
 TERAGEN_CLASS = TERASORT_PKG + "TeraGen"
 TERASORT_CLASS = TERASORT_PKG + "TeraSort"
 TERAVALIDATE_CLASS = TERASORT_PKG + "TeraValidate"
-
-STEPS = ["generate_input", "sort", "validate_output"]
 
 
 def get_args(*args, **kwargs):
@@ -46,6 +45,19 @@ def get_args(*args, **kwargs):
         type=int,
         help="size in bytes of each map partition",
     )
+    parser.add_argument(
+        "--num_workers",
+        default=8,
+        type=int,
+        help="number of workers in the YARN cluster",
+    )
+    parser.add_argument(
+        "--map_parallelism",
+        default=8,
+        type=int,
+        help="number of executors to run per YARN node",
+    )
+    parser.add_argument("--push_based_shuffle", action="store_true")
     # Which steps to run?
     steps_grp = parser.add_argument_group(
         "steps to run", "if none is specified, will run all steps"
@@ -65,6 +77,22 @@ def _get_app_args(args):
     args.num_mappers = int(np.ceil(args.total_data_size / args.input_part_size))
 
 
+def get_spark_args(args):
+    ret = []
+    # Universal setup
+    # ret.append(f"-c spark.files.maxPartitionBytes={args.input_part_size}")
+    # Parallelism: number of executors
+    num_executors = args.num_workers * args.map_parallelism
+    ret.append(f"--num-executors={num_executors}")
+    ret.append("--executor-cores=2")
+    # External shuffle service
+    if args.external_shuffle or args.push_based_shuffle:
+        ret.append("-c spark.shuffle.service.enabled=true")
+    if args.push_based_shuffle:
+        ret.append("-c spark.shuffle.push.enabled=true")
+    return ret
+
+
 def run(cmd, **kwargs):
     logging.info("$ " + cmd)
     return subprocess.run(cmd, shell=True, check=True, **kwargs)
@@ -75,16 +103,14 @@ def run_output(cmd, **kwargs):
     return proc.stdout.decode("ascii")
 
 
-def start_yarn():
-    # Set core-site.xml hadoop.tmp.dir
-    # Run $HADOOP_HOME/bin/hdfs namenode -format
-    # Run $HADOOP_HOME/sbin/start-all.sh
-    pass
+def start_hadoop():
+    run("$HADOOP_HOME/sbin/start-dfs.sh")
+    run("$HADOOP_HOME/sbin/start-yarn.sh")
 
 
 def generate_input(args):
     parts = [
-        SPARK_SUBMIT_WITH_ARGS,
+        "spark-submit",
         f"-c spark.default.parallelism={args.num_mappers}",
         f"--class {TERAGEN_CLASS}",
         f"--master yarn",
@@ -98,14 +124,18 @@ def generate_input(args):
 
 
 def sort_main(args):
-    parts = [
-        SPARK_SUBMIT_WITH_ARGS,
-        f"--class {TERASORT_CLASS}",
-        f"--master yarn",
-        JAR_PATH,
-        "/terasort/input",
-        "/terasort/output",
-    ]
+    spark_args = get_spark_args(args)
+    parts = (
+        ["spark-submit"]
+        + spark_args
+        + [
+            f"--class {TERASORT_CLASS}",
+            f"--master yarn",
+            JAR_PATH,
+            "/terasort/input",
+            "/terasort/output",
+        ]
+    )
     cmd = " ".join(parts)
     # TODO: pipe logs to terasort.log
     run(cmd)
@@ -113,7 +143,7 @@ def sort_main(args):
 
 def validate_output(args):
     parts = [
-        SPARK_SUBMIT_WITH_ARGS,
+        "spark-submit",
         f"--class {TERAVALIDATE_CLASS}",
         f"--master yarn",
         JAR_PATH,
@@ -125,10 +155,20 @@ def validate_output(args):
     run(cmd)
 
 
+def stop_hadoop():
+    run("$HADOOP_HOME/sbin/stop-yarn.sh")
+    run("$HADOOP_HOME/sbin/stop-dfs.sh")
+
+
 def main(args):
     _get_app_args(args)
     print(args)
     # TODO: wandb setup and logging of time
+    # if args.format_hdfs:
+    #     format_hdfs()
+
+    if args.start_hadoop:
+        start_hadoop()
 
     if args.generate_input:
         generate_input(args)
@@ -138,6 +178,9 @@ def main(args):
 
     if args.validate_output:
         validate_output(args)
+
+    if args.stop_hadoop:
+        stop_hadoop()
 
 
 if __name__ == "__main__":
