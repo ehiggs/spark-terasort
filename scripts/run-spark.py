@@ -57,6 +57,7 @@ def get_args(*args, **kwargs):
         type=int,
         help="number of executors to run per YARN node",
     )
+    parser.add_argument("--external_shuffle", action="store_true")
     parser.add_argument("--push_based_shuffle", action="store_true")
     # Which steps to run?
     steps_grp = parser.add_argument_group(
@@ -80,6 +81,7 @@ def _get_app_args(args):
 def get_spark_args(args):
     ret = []
     # Universal setup
+    # TODO: this didn't work
     # ret.append(f"-c spark.files.maxPartitionBytes={args.input_part_size}")
     # Parallelism: number of executors
     num_executors = args.num_workers * args.map_parallelism
