@@ -18,11 +18,9 @@ JAR_NAME = "spark-terasort-1.2-SNAPSHOT-jar-with-dependencies.jar"
 JAR_PATH = os.path.join(REPO_ROOT, "target", JAR_NAME)
 
 STEPS = [
-    "start_hadoop",
     "generate_input",
     "sort",
     "validate_output",
-    "stop_hadoop",
 ]
 
 TERASORT_PKG = "com.github.ehiggs.spark.terasort."
@@ -105,11 +103,6 @@ def run_output(cmd, **kwargs):
     return proc.stdout.decode("ascii")
 
 
-def start_hadoop():
-    run("$HADOOP_HOME/sbin/start-dfs.sh")
-    run("$HADOOP_HOME/sbin/start-yarn.sh")
-
-
 def generate_input(args):
     parts = [
         "spark-submit",
@@ -157,20 +150,10 @@ def validate_output(args):
     run(cmd)
 
 
-def stop_hadoop():
-    run("$HADOOP_HOME/sbin/stop-yarn.sh")
-    run("$HADOOP_HOME/sbin/stop-dfs.sh")
-
-
 def main(args):
     _get_app_args(args)
     print(args)
     # TODO: wandb setup and logging of time
-    # if args.format_hdfs:
-    #     format_hdfs()
-
-    if args.start_hadoop:
-        start_hadoop()
 
     if args.generate_input:
         generate_input(args)
@@ -180,9 +163,6 @@ def main(args):
 
     if args.validate_output:
         validate_output(args)
-
-    if args.stop_hadoop:
-        stop_hadoop()
 
 
 if __name__ == "__main__":
