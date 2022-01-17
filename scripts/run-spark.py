@@ -143,7 +143,7 @@ def sort_main(args):
 def validate_output(args):
     spark_args = get_spark_args(args)
     parts = [
-        "spark-submit",
+        ["spark-submit"],
         + spark_args
         + [
             f"--class {TERAVALIDATE_CLASS}",
