@@ -57,6 +57,8 @@ object TeraSort {
       .setAppName(s"TeraSort")
     val sc = new SparkContext(conf)
 
+    sc.hadoopConfiguration.set("mapred.min.split.size", "2500000000")
+    sc.hadoopConfiguration.set("mapred.max.split.size", "2500000000")
     val startTime = System.nanoTime
 
     val dataset = sc.newAPIHadoopFile[Array[Byte], Array[Byte], TeraInputFormat](inputFile)
