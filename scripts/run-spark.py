@@ -104,15 +104,19 @@ def run_output(cmd, **kwargs):
 
 
 def generate_input(args):
-    parts = [
-        "spark-submit",
-        f"-c spark.default.parallelism={args.num_mappers}",
-        f"--class {TERAGEN_CLASS}",
-        f"--master yarn",
-        JAR_PATH,
-        f"{args.total_data_size}",
-        "/terasort/input",
-    ]
+    spark_args = get_spark_args(args)
+    parts = (
+        ["spark-submit"]
+        + spark_args
+        + [
+            f"-c spark.default.parallelism={args.num_mappers}",
+            f"--class {TERAGEN_CLASS}",
+            f"--master yarn",
+            JAR_PATH,
+            f"{args.total_data_size}",
+            "/terasort/input",
+        ]
+    )
     cmd = " ".join(parts)
     # TODO: pipe logs to teragen.log
     run(cmd)
@@ -137,13 +141,17 @@ def sort_main(args):
 
 
 def validate_output(args):
+    spark_args = get_spark_args(args)
     parts = [
         "spark-submit",
-        f"--class {TERAVALIDATE_CLASS}",
-        f"--master yarn",
-        JAR_PATH,
-        "/terasort/output",
-        "/terasort/validate",
+        + spark_args
+        + [
+            f"--class {TERAVALIDATE_CLASS}",
+            f"--master yarn",
+            JAR_PATH,
+            "/terasort/output",
+            "/terasort/validate",
+        ]
     ]
     cmd = " ".join(parts)
     # TODO: pipe logs to teravalidate.log
