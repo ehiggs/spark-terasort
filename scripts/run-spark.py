@@ -8,7 +8,11 @@ import os
 import subprocess
 
 import numpy as np
+import requests
+import wandb
+import re
 
+from datetime import datetime
 
 HDFS_DIR = "terasort"
 
@@ -28,6 +32,8 @@ TERAGEN_CLASS = TERASORT_PKG + "TeraGen"
 TERASORT_CLASS = TERASORT_PKG + "TeraSort"
 TERAVALIDATE_CLASS = TERASORT_PKG + "TeraValidate"
 
+HIST_SERVER = "http://localhost:18080/api/v1/applications"
+DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%Z"
 
 def get_args(*args, **kwargs):
     parser = argparse.ArgumentParser()
@@ -95,7 +101,7 @@ def get_spark_args(args):
 
 def run(cmd, **kwargs):
     logging.info("$ " + cmd)
-    return subprocess.run(cmd, shell=True, check=True, **kwargs)
+    return subprocess.run(cmd, capture_output=True, shell=True, check=True, encoding='utf-8', **kwargs)
 
 
 def run_output(cmd, **kwargs):
@@ -119,7 +125,7 @@ def generate_input(args):
     )
     cmd = " ".join(parts)
     # TODO: pipe logs to teragen.log
-    run(cmd)
+    return run(cmd)
 
 
 def sort_main(args):
@@ -137,13 +143,13 @@ def sort_main(args):
     )
     cmd = " ".join(parts)
     # TODO: pipe logs to terasort.log
-    run(cmd)
+    return run(cmd)
 
 
 def validate_output(args):
     spark_args = get_spark_args(args)
     parts = [
-        ["spark-submit"],
+        ["spark-submit"]
         + spark_args
         + [
             f"--class {TERAVALIDATE_CLASS}",
@@ -155,7 +161,34 @@ def validate_output(args):
     ]
     cmd = " ".join(parts)
     # TODO: pipe logs to teravalidate.log
-    run(cmd)
+    return run(cmd)
+
+def log_metrics(result):
+    wandb.init(project="spark", entity="raysort")
+
+    app_id = re.search("application_\d+_\d+", str(result.stderr)).group()
+
+    metrics = {
+        "duration": 0,
+        "memoryBytesSpilled": 0,
+        "diskBytesSpilled": 0,
+        "shuffleReadBytes": 0,
+        "shuffleWriteBytes": 0
+    }
+
+    endpoint = f"{HIST_SERVER}/{app_id}"
+
+    app_metrics = requests.get(endpoint).json()
+    metrics["duration"] = app_metrics["attempts"][0]["duration"] / 1000
+
+    stage_metrics = requests.get(f"{endpoint}/stages").json()
+    for sm in stage_metrics:
+        metrics["memoryBytesSpilled"] += sm["memoryBytesSpilled"]
+        metrics["diskBytesSpilled"] += sm["diskBytesSpilled"]
+        metrics["shuffleReadBytes"] += sm["shuffleReadBytes"]
+        metrics["shuffleWriteBytes"] += sm["shuffleWriteBytes"]
+    
+    wandb.log(metrics)
 
 
 def main(args):
@@ -164,10 +197,11 @@ def main(args):
     # TODO: wandb setup and logging of time
 
     if args.generate_input:
-        generate_input(args)
+        result = generate_input(args)
 
     if args.sort:
-        sort_main(args)
+        result = sort_main(args)
+        log_metrics(result)
 
     if args.validate_output:
         validate_output(args)
