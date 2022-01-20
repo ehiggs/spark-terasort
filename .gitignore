@@ -1,3 +1,4 @@
 release.properties
 scalastyle-output.xml
 target/
+wandb/
