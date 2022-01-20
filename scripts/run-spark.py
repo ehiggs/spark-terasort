@@ -208,6 +208,9 @@ def log_metrics(args, result):
 
     wandb.log(metrics)
 
+    # Saving into wandb.run.dir automatically uploads the log
+    run(f"yarn logs -applicationId {app_id} > {wandb.run.dir}/yarn_{app_id}.log")
+
 
 def main(args):
     _get_app_args(args)
