@@ -37,10 +37,10 @@ DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%Z"
 def get_args(*args, **kwargs):
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--total_tb",
+        "--total_gb",
         default=1,
         type=float,
-        help="total data size in TiB",
+        help="total data size in GB (10^9 bytes)",
     )
     parser.add_argument(
         "--input_part_size",
@@ -77,7 +77,7 @@ def _get_app_args(args):
     if not any(args_dict[step] for step in STEPS):
         for step in STEPS:
             args_dict[step] = True
-    args.total_data_size = int(args.total_tb * 10 ** 12)
+    args.total_data_size = int(args.total_gb * 10 ** 9)
     args.num_mappers = int(np.ceil(args.total_data_size / args.input_part_size))
 
 
