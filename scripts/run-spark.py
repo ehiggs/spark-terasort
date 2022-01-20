@@ -155,7 +155,7 @@ def sort_main(args):
 
 def validate_output(args):
     spark_args = get_spark_args(args)
-    parts = [
+    parts = (
         ["spark-submit"]
         + spark_args
         + [
@@ -165,7 +165,7 @@ def validate_output(args):
             "/terasort/output",
             "/terasort/validate",
         ]
-    ]
+    )
     cmd = " ".join(parts)
     # TODO: pipe logs to teravalidate.log
     return run(cmd)
