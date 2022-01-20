@@ -60,6 +60,12 @@ def get_args(*args, **kwargs):
         type=int,
         help="number of executors to run per YARN node",
     )
+    parser.add_argument(
+        "--executor_cores",
+        default=2,
+        type=int,
+        help="number of cores per executor"
+    )
     parser.add_argument("--external_shuffle", action="store_true")
     parser.add_argument("--push_based_shuffle", action="store_true")
     # Which steps to run?
@@ -89,7 +95,7 @@ def get_spark_args(args):
     # Parallelism: number of executors
     num_executors = args.num_workers * args.map_parallelism
     ret.append(f"--num-executors={num_executors}")
-    ret.append("--executor-cores=2")
+    ret.append(f"--executor-cores={args.executor_cores}")
     # External shuffle service
     if args.external_shuffle or args.push_based_shuffle:
         ret.append("-c spark.shuffle.service.enabled=true")
@@ -165,8 +171,18 @@ def validate_output(args):
     return run(cmd)
 
 
-def log_metrics(result):
-    wandb.init(project="spark", entity="raysort")
+def log_metrics(args, result):
+    config = {
+        "total_gb": args.total_gb,
+        "input_part_size": args.input_part_size,
+        "num_workers": args.num_workers,
+        "map_parallelism": args.map_parallelism,
+        "executor_cores": args.executor_cores,
+        "external_shuffle": args.external_shuffle,
+        "push_based_shuffle": args.push_based_shuffle,
+    }
+
+    wandb.init(project="spark", entity="raysort", config=config)
 
     app_id = re.search("application_\d+_\d+", str(result.stderr)).group()
 
@@ -203,7 +219,7 @@ def main(args):
 
     if args.sort:
         result = sort_main(args)
-        log_metrics(result)
+        log_metrics(args, result)
 
     if args.validate_output:
         validate_output(args)
