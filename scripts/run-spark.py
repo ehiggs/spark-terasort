@@ -12,8 +12,6 @@ import requests
 import wandb
 import re
 
-from datetime import datetime
-
 HDFS_DIR = "terasort"
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
@@ -34,6 +32,7 @@ TERAVALIDATE_CLASS = TERASORT_PKG + "TeraValidate"
 
 HIST_SERVER = "http://localhost:18080/api/v1/applications"
 DATE_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%Z"
+
 
 def get_args(*args, **kwargs):
     parser = argparse.ArgumentParser()
@@ -101,7 +100,9 @@ def get_spark_args(args):
 
 def run(cmd, **kwargs):
     logging.info("$ " + cmd)
-    return subprocess.run(cmd, capture_output=True, shell=True, check=True, encoding='utf-8', **kwargs)
+    return subprocess.run(
+        cmd, capture_output=True, shell=True, check=True, encoding="utf-8", **kwargs
+    )
 
 
 def run_output(cmd, **kwargs):
@@ -163,6 +164,7 @@ def validate_output(args):
     # TODO: pipe logs to teravalidate.log
     return run(cmd)
 
+
 def log_metrics(result):
     wandb.init(project="spark", entity="raysort")
 
@@ -173,7 +175,7 @@ def log_metrics(result):
         "memoryBytesSpilled": 0,
         "diskBytesSpilled": 0,
         "shuffleReadBytes": 0,
-        "shuffleWriteBytes": 0
+        "shuffleWriteBytes": 0,
     }
 
     endpoint = f"{HIST_SERVER}/{app_id}"
@@ -187,7 +189,7 @@ def log_metrics(result):
         metrics["diskBytesSpilled"] += sm["diskBytesSpilled"]
         metrics["shuffleReadBytes"] += sm["shuffleReadBytes"]
         metrics["shuffleWriteBytes"] += sm["shuffleWriteBytes"]
-    
+
     wandb.log(metrics)
 
 
