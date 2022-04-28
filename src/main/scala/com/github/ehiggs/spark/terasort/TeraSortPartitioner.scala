@@ -18,6 +18,7 @@
 package com.github.ehiggs.spark.terasort
 
 import com.google.common.primitives.Longs
+import scala.math.BigDecimal
 
 import org.apache.spark.Partitioner
 
@@ -29,7 +30,8 @@ case class TeraSortPartitioner(numPartitions: Int) extends Partitioner {
 
   import TeraSortPartitioner._
 
-  val rangePerPart : Long = (max - min) / numPartitions
+  val rangePerPart : Long =
+    (BigDecimal(max - min) / numPartitions).setScale(0, BigDecimal.RoundingMode.UP).toLong
 
   override def getPartition(key: Any): Int = {
     val b = key.asInstanceOf[Array[Byte]]
